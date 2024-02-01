@@ -1,14 +1,14 @@
 package app.wolfware.bridge;
 
+import app.wolfware.light.HueLight;
+import app.wolfware.room.HueRoom;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import de.wolfsline.hue.light.HueLight;
-import de.wolfsline.hue.room.HueRoom;
 
 public class HueBridge {
 
