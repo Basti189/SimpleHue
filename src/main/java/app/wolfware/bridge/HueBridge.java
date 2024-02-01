@@ -66,7 +66,7 @@ public class HueBridge {
 
 	public void println(String s) {
 		if (mDebug) {
-			System.out.println("<HueBridge> " + s);
+			System.out.println("[HueBridge] " + s);
 		}
 	}
 
@@ -106,6 +106,7 @@ public class HueBridge {
 					mIP = inputLine.substring(inputLine.indexOf(",") + 1, inputLine.length());
 					mIP = mIP.replace("\"internalipaddress\":\"", "");
 					mIP = mIP.replace("\"}]", "");
+					mIP = mIP.replace("\",\"port\":443}]", "");
 					println("Bridge IP: " + mIP);
 					return true;
 				}
@@ -128,8 +129,11 @@ public class HueBridge {
 	}
 	
 	public boolean verify() {
-		//TODO
-		return false;
+		String content;
+		if ((content = GET("info")).length() > 0) {
+			mVerify = !content.contains("\"description\":\"unauthorized user\"");
+		}
+		return mVerify;
 	}
 	
 	public boolean isVerified() {
@@ -163,7 +167,8 @@ public class HueBridge {
 			if ((content = GET("groups/" + roomID)).indexOf("error") != -1) {
 				continue;
 			}
-			if (getValueFromObject("type", content).equals("Room")) {
+			String type = getValueFromObject("type", content);
+			if (type.equals("Room") ||type.equals("Zone")) {
 				room.add(roomID, getValueFromObject("name", content));
 				count++;
 			}
@@ -654,6 +659,7 @@ public class HueBridge {
 		println("Call <GET>: " + call);
 		try {
 			URL url = new URL("http://" + mIP + "/api/" + mToken + "/" + call);
+			//System.out.println(url.toString());
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 			con.setRequestProperty("Host", mIP);
@@ -661,14 +667,14 @@ public class HueBridge {
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 			con.getInputStream()));
 			String inputLine;
-			String output = "";
+			StringBuilder output = new StringBuilder();
 			while ((inputLine = in.readLine()) != null) {
-				output += inputLine;
+				output.append(inputLine);
 			} 
 			in.close();
-			return output;
+			return output.toString();
 		} catch (Exception e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 		}
 		return "";
 	}
